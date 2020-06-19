@@ -32,13 +32,18 @@ config = {
   performance: {
     raft_multiplier: 1
   },
-  server: true,
-  raft_protocol: 3,
-  bootstrap_expect: from_env('BOOTSTRAP_EXPECT').to_i,
   retry_join: from_env('RETRY_JOINS').split(','),
   enable_local_script_checks: true,
   server_name: from_env('NODE_NAME'),
 }
+
+if ENV['IS_SERVER']
+  config.merge!(
+    server: true,
+    raft_protocol: 3,
+    bootstrap_expect: from_env('BOOTSTRAP_EXPECT').to_i,
+  )
+end
 
 JSON.pretty_generate(config)
 %>

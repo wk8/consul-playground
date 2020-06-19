@@ -2,6 +2,8 @@
 
 set -e
 
-erb /etc/consul.json.erb > /etc/consul.json
+CONFIG_FILE='/etc/consul.json'
 
-exec consul agent -config-file /etc/consul.json
+erb /etc/consul.json.erb > "$CONFIG_FILE"
+
+exec consul agent -config-file "$CONFIG_FILE"

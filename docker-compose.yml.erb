@@ -1,6 +1,12 @@
 <%
+$_16_SUBNET_PREFIX = '172.28'
+
 def server_ip server_id
-  "172.28.1.#{server_id}"
+  "#{$_16_SUBNET_PREFIX}.28.#{server_id}"
+end
+
+def client_ip client_id
+  "#{$_16_SUBNET_PREFIX}.29.#{client_id}"
 end
 
 retry_joins = servers.times.map { |i| server_ip i + 1 }.join(',')
@@ -9,8 +15,8 @@ version: '3'
 
 services:
 <%- servers.times do |i|
-  server_id = i + 1 
-  name = "server_#{server_id}" 
+  server_id = i + 1
+  name = "server_#{server_id}"
   ip = server_ip server_id
 %>
   <%= name %>:
@@ -18,16 +24,33 @@ services:
     environment:
       NODE_NAME: '<%= name %>'
       BIND_ADDR: '<%= ip %>'
+      RETRY_JOINS: '<%= retry_joins %>'
+      IS_SERVER: 1
       BOOTSTRAP_EXPECT: <%= servers %>
+    networks:
+      consul_playground_net:
+        ipv4_address: <%= ip %>
+<% end %>
+
+<%- clients.times do |i|
+  client_id = i + 1
+  name = "client_#{client_id}"
+  ip = client_ip client_id
+%>
+  <%= name %>:
+    image: consul-playground
+    environment:
+      NODE_NAME: '<%= name %>'
+      BIND_ADDR: '<%= ip %>'
       RETRY_JOINS: '<%= retry_joins %>'
     networks:
-      testing_net:
+      consul_playground_net:
         ipv4_address: <%= ip %>
 <% end %>
 
 networks:
-    testing_net:
+    consul_playground_net:
         ipam:
             driver: default
             config:
-                - subnet: <%= server_ip 0 %>/24
+                - subnet: <%= $_16_SUBNET_PREFIX %>.0.0/16
