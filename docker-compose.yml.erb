@@ -49,8 +49,8 @@ services:
 <% end %>
 
 networks:
-    consul_playground_net:
-        ipam:
-            driver: default
-            config:
-                - subnet: <%= $_16_SUBNET_PREFIX %>.0.0/16
+  consul_playground_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: <%= $_16_SUBNET_PREFIX %>.0.0/16
