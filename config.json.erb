@@ -1,0 +1,45 @@
+<%=
+require 'json'
+
+def from_env(key)
+  (ENV[key] || '').strip.tap { |s| raise "Env var #{key} undefined" if s.empty? } 
+end
+
+config = {
+  datacenter: 'playground',
+  node_name: from_env('NODE_NAME'),
+  bind_addr: from_env('BIND_ADDR'),
+  data_dir: '/opt/consul',
+  enable_debug: true,
+  enable_script_checks: false,
+  disable_remote_exec: true,
+  disable_update_check: true,
+  client_addr: '0.0.0.0',
+  dns_config: {
+    allow_stale: true,
+    enable_truncate: true,
+    only_passing: true,
+    node_ttl: '60s',
+    service_ttl: {
+      '*': '15s'
+    },
+    enable_additional_node_meta_txt: false
+  },
+  limits: {
+    rpc_rate: 1000,
+    rpc_max_burst: 3000
+  },
+  performance: {
+    raft_multiplier: 1
+  },
+  server: true,
+  raft_protocol: 3,
+  bootstrap_expect: from_env('BOOTSTRAP_EXPECT').to_i,
+  retry_join: from_env('RETRY_JOINS').split(','),
+  enable_local_script_checks: true,
+  server_name: from_env('NODE_NAME'),
+}
+
+JSON.pretty_generate(config)
+%>
+

@@ -1,0 +1,33 @@
+<%
+def server_ip server_id
+  "172.28.1.#{server_id}"
+end
+
+retry_joins = servers.times.map { |i| server_ip i + 1 }.join(',')
+%>
+version: '3'
+
+services:
+<%- servers.times do |i|
+  server_id = i + 1 
+  name = "server_#{server_id}" 
+  ip = server_ip server_id
+%>
+  <%= name %>:
+    image: consul-playground
+    environment:
+      NODE_NAME: '<%= name %>'
+      BIND_ADDR: '<%= ip %>'
+      BOOTSTRAP_EXPECT: <%= servers %>
+      RETRY_JOINS: '<%= retry_joins %>'
+    networks:
+      testing_net:
+        ipv4_address: <%= ip %>
+<% end %>
+
+networks:
+    testing_net:
+        ipam:
+            driver: default
+            config:
+                - subnet: <%= server_ip 0 %>/24
